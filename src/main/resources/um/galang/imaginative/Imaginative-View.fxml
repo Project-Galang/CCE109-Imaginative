@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="883.0" prefWidth="658.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="um.galang.imaginative.ImaginativeController">
+   <children>
+      <HBox alignment="CENTER" fillHeight="false" prefHeight="33.0" prefWidth="658.0" spacing="3.0" style="-fx-background-color: #1e2124;">
+         <children>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="10.0" />
+            <ImageView fitHeight="22.0" fitWidth="138.0">
+               <image>
+                  <Image url="@logo-imaginative.png" />
+               </image>
+            </ImageView>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="                               " wrappingWidth="429.900390625" />
+            <JFXButton fx:id="minimizeButton" onAction="#minimizeStage" prefHeight="33.0" prefWidth="43.0" ripplerFill="#ff3232" style="-fx-background-radius: 0; -fx-border-radius: 0; -fx-background-color: #1e2124;" text="—" textFill="WHITE" />
+            <JFXButton fx:id="closeButton" onAction="#closeStage" prefHeight="33.0" prefWidth="39.0" ripplerFill="#ff3232" style="-fx-background-color: #1e2124; -fx-border-radius: 0; -fx-background-radius: 0;" text="×" textFill="WHITE">
+               <font>
+                  <Font name="Roboto Medium" size="17.0" />
+               </font>
+            </JFXButton>
+         </children>
+      </HBox>
+      <VBox alignment="CENTER" fillWidth="false" prefHeight="858.0" prefWidth="658.0" style="-fx-background-color: #36393e;">
+         <padding>
+            <Insets left="20.0" right="20.0" />
+         </padding>
+         <children>
+            <ImageView fitHeight="96.0" fitWidth="229.0">
+               <image>
+                  <Image url="@um-white.png" />
+               </image>
+               <VBox.margin>
+                  <Insets bottom="25.0" />
+               </VBox.margin>
+            </ImageView>
+            <VBox prefHeight="200.0" prefWidth="100.0" spacing="15.0">
+               <children>
+                  <HBox fillHeight="false" prefHeight="493.0" prefWidth="531.0" style="-fx-border-color: #424549;">
+                     <children>
+                        <ImageView fx:id="ImageContainer" fitHeight="529.0" fitWidth="529.0" pickOnBounds="true" preserveRatio="true">
+                           <viewport>
+                              <Rectangle2D height="1024.0" width="1024.0" />
+                           </viewport>
+                           <image>
+                              <Image url="@default.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                     <children>
+                        <JFXButton onAction="#backGenerate" style="-fx-background-color: white;" text="&lt;" />
+                        <JFXButton onAction="#nextGenerate" style="-fx-background-color: white;" text="&gt;" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="50.0" prefWidth="531.0">
+                     <children>
+                        <VBox prefHeight="68.0" prefWidth="531.0">
+                           <children>
+                              <Label prefHeight="30.0" prefWidth="237.0" text="Provide your Imaginative Description:" textFill="WHITE">
+                                 <padding>
+                                    <Insets bottom="5.0" />
+                                 </padding>
+                                 <font>
+                                    <Font name="Roboto Black" size="12.0" />
+                                 </font>
+                              </Label>
+                              <HBox prefHeight="27.0" prefWidth="540.0" spacing="5.0">
+                                 <children>
+                                    <TextField fx:id="PromptField" accessibleText="An Impressionist oil painting of sunflowers in a purple vase..." prefHeight="27.0" prefWidth="463.0" promptText="An Impressionist oil painting of sunflowers in a purple vase..." style="-fx-background-color: white;" text="A photo of a hyperrealistic white fur monster standing in a purple room">
+                                       <font>
+                                          <Font name="Roboto Light" size="12.0" />
+                                       </font>
+                                    </TextField>
+                                    <JFXButton fx:id="GenerateButton" onAction="#GenerateImaginative" prefHeight="25.0" prefWidth="126.0" ripplerFill="#3844c8" style="-fx-background-color: #6064f4;" text="Generate" textFill="WHITE" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="23.0" prefWidth="531.0" text="Project Galang By Aidre Cabrera |  Powered by Dall • E - 2" textFill="WHITE">
+                           <padding>
+                              <Insets bottom="5.0" />
+                           </padding>
+                           <font>
+                              <Font name="Roboto Medium" size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </children>
+</VBox>
