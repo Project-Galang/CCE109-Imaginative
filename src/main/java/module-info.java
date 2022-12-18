@@ -1,4 +1,4 @@
-module com.example.imaginative {
+module um.galang.imaginative {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.net.http;
