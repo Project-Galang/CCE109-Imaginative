@@ -61,6 +61,7 @@
                   <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                      <children>
                         <JFXButton onAction="#backGenerate" style="-fx-background-color: white;" text="&lt;" />
+                        <JFXButton onAction="#saveImage" prefHeight="25.0" prefWidth="64.0" ripplerFill="#00a45d" style="-fx-background-color: white;" text="Save" />
                         <JFXButton onAction="#nextGenerate" style="-fx-background-color: white;" text="&gt;" />
                      </children>
                   </HBox>

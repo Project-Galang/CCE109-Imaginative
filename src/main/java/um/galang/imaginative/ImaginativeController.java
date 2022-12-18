@@ -8,11 +8,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -28,17 +30,24 @@ import javafx.stage.Stage;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Properties;
+import javafx.embed.swing.SwingFXUtils;
 
 public class ImaginativeController {
     @FXML
-    private ImageView ImageContainer;
+    public ImageView ImageContainer;
     @FXML
     private TextField PromptField;
     static HttpResponse<String> response;
     static libraryFunction lib = new libraryFunction();
     static String extractedURL;
-    int currentIndex = 0;
+    public static int currentIndex = 0;
     ArrayList<Image> images = new ArrayList<>();
+    ArrayList<String> imagesUrl = new ArrayList<>();
+
+    HashMap<Image, String> metadata = new HashMap<>();
+
     @FXML
     private Button backGenerate;
     @FXML
@@ -46,6 +55,9 @@ public class ImaginativeController {
 
     @FXML
     public void initialize() {
+        getApiKey();
+        System.out.println("Retrieved API Key: " + retrievedAPI);
+        System.out.println();
     }
     @FXML
     void backGenerate(ActionEvent event) {
@@ -67,9 +79,60 @@ public class ImaginativeController {
         // Set the image view to the next image
         ImageContainer.setImage(images.get(currentIndex));
     }
-    int generateSession = 1;
+    int generateSession = 0;
+    String apiKey, retrievedAPI;
+    void getApiKey() {
+        // Reading the api_key from the api_keys.properties file (Locally Stored for Security Purposes).
+        Properties prop = new Properties();
+        // Reading the api_keys.properties file and returning the api_key property.
+        try (InputStream input = new FileInputStream("src/main/api_keys.properties")) {
+            // Reading the api_key from the properties file.
+            prop.load(input);
+            retrievedAPI = prop.getProperty("api_key");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+    @FXML
+    void saveImage(ActionEvent event) throws IOException {
+        saveRetrievedImage();
+    }
+    private static final String FILE_EXTENSION = "png";
+    void saveRetrievedImage() throws IOException {
+        // Load the image from a URL
+        BufferedImage image = SwingFXUtils.fromFXImage(ImageContainer.getImage(), null);
+
+        // Create a file chooser
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save File");
+        fileChooser.setFileFilter(new FileNameExtensionFilter("PNG Images", "png"));
+
+        // Show the file chooser and get the user's response
+        int userSelection = fileChooser.showSaveDialog(null);
+
+        // If the user selected a file
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            // Get the selected file
+            File fileToSave = fileChooser.getSelectedFile();
+
+            // Ensure that the file has the correct extension
+            if (!fileToSave.getName().endsWith(".png")) {
+                fileToSave = new File(fileToSave.getAbsolutePath() + ".png");
+            }
+
+            // Save the image to the selected file
+            try {
+                ImageIO.write(image, "png", fileToSave);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(null, "Error saving image: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+    }
+
     @FXML
     void GenerateImaginative(ActionEvent event) {
+        generateSession++;
         new Thread( ()-> {
             // Create a new progress bar
             JProgressBar progressBar = new JProgressBar();
@@ -95,10 +158,8 @@ public class ImaginativeController {
             }
         }).start();
 
-
         // Perform the API request concurrently in a separate thread
         new Thread(() -> {
-            // Get the current scene
             Scene newScene = ImageContainer.getScene();
             // Set the cursor to the "WAIT" cursor
             newScene.setCursor(Cursor.WAIT);
@@ -111,6 +172,7 @@ public class ImaginativeController {
                     return triggerRequest(PromptField.getText());
                 }
             };
+            JOptionPane jOptionPane = new JOptionPane();
             // Set up a listener to update the UI when the task is complete
             task.setOnSucceeded(action -> {
                 String imageUrl = task.getValue();
@@ -118,14 +180,20 @@ public class ImaginativeController {
                 try {
                     url = new URL(imageUrl);
                 } catch (MalformedURLException e) {
+                    JOptionPane.showMessageDialog(null, "An error occurred while communicating with the API Server", "Imaginative Error", JOptionPane.ERROR_MESSAGE);
+                    newScene.setCursor(Cursor.DEFAULT);
                     throw new RuntimeException(e);
                 }
                 try (InputStream inputStream = new BufferedInputStream(url.openStream())) {
                     Image image = new Image(inputStream);
+                    metadata.put(image, extractedURL);
+                    imagesUrl.add(extractedURL);
                     images.add(image);
                     ImageContainer.setImage(image);
                     newScene.setCursor(Cursor.DEFAULT);
                 } catch (IOException e) {
+                    newScene.setCursor(Cursor.DEFAULT);
+                    JOptionPane.showMessageDialog(null, "An error occurred while communicating with the API Server", "Imaginative Error", JOptionPane.ERROR_MESSAGE);
                     throw new RuntimeException(e);
                 }
                 // Close the modal dialog
@@ -135,6 +203,7 @@ public class ImaginativeController {
             // Start the task in a background thread
             new Thread(task).start();
         }).start();
+
     }
     void initialRequest() throws MalformedURLException {
         String imageUrl = triggerRequest(PromptField.getText());
@@ -150,7 +219,7 @@ public class ImaginativeController {
         System.out.println("API Request Communication Triggered");
         // Set the API endpoint and your API key
         String endpoint = "https://api.openai.com/v1/images/generations";
-        String apiKey = "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";
+        apiKey = retrievedAPI;
         // Set the number of images to generate and the size of the image
         int n = 1;
         String size = "1024x1024";
@@ -193,11 +262,16 @@ public class ImaginativeController {
 
 class libraryFunction {
     String parseUrlJSON(String JSONResponse) {
+        String url = null;
         // Create a JsonParser instance
         JsonParser parser = new JsonParser();
         // Parse the JSON data
         JsonObject root = parser.parse(JSONResponse).getAsJsonObject();
-        String url = root.getAsJsonArray("data").get(0).getAsJsonObject().get("url").getAsString();
+        if (root.has("error")) {
+            JOptionPane.getRootFrame().dispose();
+        } else {
+            url = root.getAsJsonArray("data").get(0).getAsJsonObject().get("url").getAsString();
+        }
         // Print the url value
         return url;
     }
@@ -212,34 +286,5 @@ class libraryFunction {
 
         // Create a JavaFX image from the input stream
         return in;
-    }
-    void saveRetrievedImage(String extractedURL) throws IOException {
-        // Load the image from a URL
-        BufferedImage image = ImageIO.read(new URL(extractedURL));
-        convertBufferedImage(image);
-
-        // Create a file chooser
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Save File");
-        fileChooser.setFileFilter(new FileNameExtensionFilter(".png", ".png"));
-
-        // Prompt the user to select a file
-        int userSelection = fileChooser.showSaveDialog(null);
-
-        // If the user selects a file, save the image to it
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            File fileToSave = fileChooser.getSelectedFile();
-            try {
-                ImageIO.write(image, ".png", fileToSave);
-                // Extract the file's name and parent directory
-                String fileName = fileToSave.getName();
-                String parentDir = fileToSave.getParent();
-                // Append the string to the filename
-                String modifiedFileName = fileName + ".png";
-                // Create a new File object using the modified filename and the original parent directory
-            } catch (IOException e) {
-                System.out.println("Error has occured while saving the image.");
-            }
-        }
     }
 }

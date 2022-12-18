@@ -4,6 +4,7 @@ module com.example.imaginative {
     requires java.net.http;
     requires java.desktop;
     requires com.google.gson;
+    requires javafx.swing;
 
 
     opens um.galang.imaginative to javafx.fxml;
